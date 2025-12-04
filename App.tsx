@@ -1,24 +1,26 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Sidebar } from './components/Sidebar';
-import { Auth } from './pages/Auth';
 import Dashboard from './pages/Dashboard';
 import Documents from './pages/Documents';
 import Chat from './pages/Chat';
 import { Settings } from './pages/Settings';
 import { User } from './types';
 
-const App: React.FC = () => {
-  const [user, setUser] = useState<User | null>(null);
+// Mock user constant since login is removed
+const DEFAULT_USER: User = {
+  id: 'demo-user',
+  name: 'Admin User',
+  email: 'admin@documind.ai',
+};
 
-  if (!user) {
-    return <Auth onLogin={setUser} />;
-  }
+const App: React.FC = () => {
+  const user = DEFAULT_USER;
 
   return (
     <HashRouter>
       <div className="flex min-h-screen bg-gray-50 font-sans text-gray-900">
-        <Sidebar user={user} onLogout={() => setUser(null)} />
+        <Sidebar user={user} onLogout={() => {}} />
         <main className="flex-1 overflow-x-hidden overflow-y-auto h-screen">
           <Routes>
             <Route path="/" element={<Dashboard />} />

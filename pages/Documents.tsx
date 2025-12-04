@@ -11,7 +11,8 @@ import {
   Image as ImageIcon, 
   FileSpreadsheet,
   UploadCloud,
-  X
+  X,
+  Settings2
 } from 'lucide-react';
 import { Button } from '../components/Button';
 
@@ -19,6 +20,14 @@ const Documents: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [filterType, setFilterType] = useState<DocType | 'ALL'>('ALL');
   const [selectedDoc, setSelectedDoc] = useState<Document | null>(null);
+
+  // Grid View Customization State
+  const [showCustomizeMenu, setShowCustomizeMenu] = useState(false);
+  const [gridConfig, setGridConfig] = useState({
+    showDate: true,
+    showSize: true,
+    showTags: true,
+  });
 
   const filteredDocs = MOCK_DOCUMENTS.filter(doc => 
     filterType === 'ALL' ? true : doc.type === filterType
@@ -77,19 +86,67 @@ const Documents: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center bg-gray-100 p-1 rounded-lg">
-          <button 
-            onClick={() => setViewMode('list')}
-            className={`p-1.5 rounded-md transition-all ${viewMode === 'list' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
-          >
-            <List size={18} />
-          </button>
-          <button 
-            onClick={() => setViewMode('grid')}
-            className={`p-1.5 rounded-md transition-all ${viewMode === 'grid' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
-          >
-            <Grid size={18} />
-          </button>
+        <div className="flex items-center gap-3">
+            {/* Customize View Button (Grid Mode Only) */}
+            {viewMode === 'grid' && (
+                <div className="relative">
+                    <button 
+                        onClick={() => setShowCustomizeMenu(!showCustomizeMenu)}
+                        className={`flex items-center gap-2 px-3 py-2 border rounded-lg text-sm transition-colors ${showCustomizeMenu ? 'bg-gray-100 border-gray-300 text-gray-900' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}
+                    >
+                        <Settings2 size={16} />
+                        <span className="hidden sm:inline">Hiển thị</span>
+                    </button>
+
+                    {showCustomizeMenu && (
+                        <div className="absolute top-full right-0 mt-2 w-56 bg-white border border-gray-100 shadow-lg rounded-lg z-20 p-2 animate-fade-in">
+                            <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-2 py-1 mb-1">Thông tin thẻ</div>
+                            <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
+                                <input 
+                                    type="checkbox" 
+                                    checked={gridConfig.showSize}
+                                    onChange={(e) => setGridConfig(prev => ({...prev, showSize: e.target.checked}))}
+                                    className="rounded border-gray-300 text-gray-900 focus:ring-gray-900"
+                                />
+                                <span className="text-sm text-gray-700">Kích thước file</span>
+                            </label>
+                            <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
+                                <input 
+                                    type="checkbox" 
+                                    checked={gridConfig.showDate}
+                                    onChange={(e) => setGridConfig(prev => ({...prev, showDate: e.target.checked}))}
+                                    className="rounded border-gray-300 text-gray-900 focus:ring-gray-900"
+                                />
+                                <span className="text-sm text-gray-700">Ngày tải lên</span>
+                            </label>
+                            <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
+                                <input 
+                                    type="checkbox" 
+                                    checked={gridConfig.showTags}
+                                    onChange={(e) => setGridConfig(prev => ({...prev, showTags: e.target.checked}))}
+                                    className="rounded border-gray-300 text-gray-900 focus:ring-gray-900"
+                                />
+                                <span className="text-sm text-gray-700">Thẻ (Tags)</span>
+                            </label>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            <div className="flex items-center bg-gray-100 p-1 rounded-lg">
+            <button 
+                onClick={() => setViewMode('list')}
+                className={`p-1.5 rounded-md transition-all ${viewMode === 'list' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+            >
+                <List size={18} />
+            </button>
+            <button 
+                onClick={() => setViewMode('grid')}
+                className={`p-1.5 rounded-md transition-all ${viewMode === 'grid' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+            >
+                <Grid size={18} />
+            </button>
+            </div>
         </div>
       </div>
 
@@ -145,14 +202,25 @@ const Documents: React.FC = () => {
                     <button className="text-gray-400 hover:text-gray-600"><MoreVertical size={16} /></button>
                   </div>
                   <h3 className="font-medium text-gray-900 mb-1 truncate" title={doc.name}>{doc.name}</h3>
-                  <p className="text-xs text-gray-500">{doc.size} • {new Date(doc.uploadDate).toLocaleDateString('vi-VN')}</p>
+                  
+                  {/* Customized Meta Info */}
+                  {(gridConfig.showSize || gridConfig.showDate) && (
+                      <p className="text-xs text-gray-500 mt-1">
+                          {gridConfig.showSize && <span>{doc.size}</span>}
+                          {gridConfig.showSize && gridConfig.showDate && <span> • </span>}
+                          {gridConfig.showDate && <span>{new Date(doc.uploadDate).toLocaleDateString('vi-VN')}</span>}
+                      </p>
+                  )}
                 </div>
                 
-                <div className="mt-4 flex flex-wrap gap-1">
-                    {doc.tags.map(tag => (
-                        <span key={tag} className="text-[10px] px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded">{tag}</span>
-                    ))}
-                </div>
+                {/* Customized Tags */}
+                {gridConfig.showTags && (
+                    <div className="mt-4 flex flex-wrap gap-1">
+                        {doc.tags.map(tag => (
+                            <span key={tag} className="text-[10px] px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded">{tag}</span>
+                        ))}
+                    </div>
+                )}
               </div>
             ))}
           </div>

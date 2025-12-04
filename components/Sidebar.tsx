@@ -6,7 +6,6 @@ import {
   Library, 
   Settings, 
   Sparkles,
-  LogOut,
   User as UserIcon
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
@@ -17,7 +16,7 @@ interface SidebarProps {
   onLogout: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ user, onLogout }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ user }) => {
   const location = useLocation();
 
   const isActive = (path: string) => {
@@ -93,13 +92,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ user, onLogout }) => {
                 <p className="text-xs text-gray-500 truncate">{user.email}</p>
             </div>
         </div>
-        <button 
-            onClick={onLogout}
-            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md transition-colors"
-        >
-            <LogOut size={16} />
-            Đăng xuất
-        </button>
       </div>
     </aside>
   );
